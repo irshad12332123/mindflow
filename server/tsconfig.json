@@ -27,7 +27,6 @@
 
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"downlevelIteration": true,
 		"declaration": true,
 
 		"pretty": true
