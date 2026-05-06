@@ -1,6 +1,10 @@
-/.vscode
-/node_modules
-/dist
-/.env
-/.env.local
-
+node_modules/
+.env*
+!.env.example
+dist/
+build/
+.vscode/
+.idea/
+.DS_Store
+logs/
+coverage/
