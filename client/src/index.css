@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #8B5CF6;
+  --primary-light: #A78BFA;
+  --surface: #101415;
+  --surface-container: #1d2021;
+}
+
+@layer base {
+  body {
+    background-color: #101415;
+    @apply text-white;
+    font-family: 'Inter', sans-serif;
+  }
+}
+  
+  h1, h2, h3 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+
+@layer components {
+  .shadow-glow-purple {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+  }
+  
+  .shadow-glow-primary {
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  }
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}*/
