@@ -35,7 +35,7 @@ export const createPlanFromBrainDump = async (req: Request, res: Response) => {
     const planPayload = await orchestration(rawText, userId);
 
     return res.status(200).json({
-      message: "plan create successfully",
+      message: "plan created successfully",
       payload: planPayload,
     });
   } catch (error: any) {
