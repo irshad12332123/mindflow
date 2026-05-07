@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "dev": "ts-node src/index.ts",
+    "dev": "nodemon --exec ts-node src/index.ts",
     "lint": "tslint -c tslint.json src/**/*.ts",
     "prepublish": "npm run build",
     "start": "node dist/index.js"
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/node": "^25.6.0",
+    "nodemon": "^3.1.14",
     "tslint": "^5.20.1",
     "typescript": "^6.0.3"
   },
@@ -26,6 +27,7 @@
   ],
   "typings": "./lib/index.d.ts",
   "dependencies": {
+    "@google/genai": "^1.52.0",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.2",
     "@supabase/supabase-js": "^2.105.3",
