@@ -447,6 +447,9 @@ model users {
   webauthn_challenges         webauthn_challenges[]
   webauthn_credentials        webauthn_credentials[]
   brain_dumps                 brain_dumps[]
+  daily_schedules             daily_schedules[]
+  task_logs                   task_logs[]
+  tasks                       tasks[]
 
   @@index([created_at(sort: Desc)], map: "idx_users_created_at_desc")
   @@index([email], map: "idx_users_email")
@@ -501,7 +504,75 @@ model brain_dumps {
   created_at        DateTime? @default(now()) @db.Timestamp(6)
   updated_at        DateTime? @default(now()) @db.Timestamp(6)
   users             users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user")
+  tasks             tasks[]
 
+  @@index([user_id], map: "idx_brain_dumps_user_id")
+  @@schema("public")
+}
+
+model daily_schedules {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String    @db.Uuid
+  task_id         String    @db.Uuid
+  start_time      DateTime  @db.Timestamp(6)
+  end_time        DateTime  @db.Timestamp(6)
+  schedule_date   DateTime  @db.Date
+  schedule_status String?   @default("scheduled") @db.VarChar(50)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  tasks           tasks     @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([schedule_date], map: "idx_schedule_date")
+  @@index([user_id], map: "idx_schedule_user_id")
+  @@schema("public")
+}
+
+model subtasks {
+  id                         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  task_id                    String    @db.Uuid
+  title                      String    @db.VarChar(255)
+  estimated_duration_minutes Int?
+  status                     String?   @default("pending") @db.VarChar(50)
+  created_at                 DateTime? @default(now()) @db.Timestamp(6)
+  tasks                      tasks     @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model task_logs {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String    @db.Uuid
+  task_id          String    @db.Uuid
+  action_type      String?   @db.VarChar(50)
+  notes            String?
+  action_timestamp DateTime? @default(now()) @db.Timestamp(6)
+  tasks            tasks     @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_task_logs_user_id")
+  @@schema("public")
+}
+
+model tasks {
+  id                         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brain_dump_id              String            @db.Uuid
+  user_id                    String            @db.Uuid
+  title                      String            @db.VarChar(255)
+  task_type                  String?           @db.VarChar(50)
+  deadline                   DateTime?         @db.Timestamp(6)
+  estimated_duration_minutes Int?
+  priority_score             Decimal?          @db.Decimal(5, 2)
+  recommended_time_minutes   Int?
+  status                     String?           @default("pending") @db.VarChar(50)
+  created_at                 DateTime?         @default(now()) @db.Timestamp(6)
+  daily_schedules            daily_schedules[]
+  subtasks                   subtasks[]
+  task_logs                  task_logs[]
+  brain_dumps                brain_dumps       @relation(fields: [brain_dump_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                      users             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([brain_dump_id], map: "idx_tasks_brain_dump_id")
+  @@index([user_id], map: "idx_tasks_user_id")
   @@schema("public")
 }
 
