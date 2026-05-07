@@ -14,8 +14,10 @@ export const extractTasks = async (
     const response = result.response;
 
     const parsedResponse = cleanResponse(response.text());
-    console.log(parsedResponse);
+    
     const tasks: taskType[] = parsedResponse.tasks;
+    const fixedConstraints = parsedResponse.fixed_commitments;
+    const freeSlots = parsedResponse.free_slots;
 
     const formattedTasks = tasks.map((task) => ({
       title: task.title,
@@ -29,9 +31,9 @@ export const extractTasks = async (
       user_id: userId,
     }));
 
-    await storeTasks(formattedTasks);
+    const createdTasks = await storeTasks(formattedTasks);
 
-    return formattedTasks;
+    return { createdTasks, fixedConstraints, freeSlots };
   } catch (error: any) {
     console.error("Error occurred while extracting tasks:", error.message);
 

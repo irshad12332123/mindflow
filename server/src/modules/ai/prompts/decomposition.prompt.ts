@@ -1,65 +1,106 @@
-import { taskType } from "../../task/types/task";
+import {
+  fixedConstraintsType,
+  freeSlotsType,
+  taskType,
+} from "../../task/types/task";
 
 export const subTaskPrompt = (
-  tasks: taskType
-) => `
-You are an intelligent task decomposition engine.
+  tasks: taskType[],
+  fixedConstraints: fixedConstraintsType,
+  freeSlots: freeSlotsType,
+) => {
+  return `
+You are an intelligent task decomposition and prioritization engine.
 
-Your job is to break high-level tasks into smaller actionable subtasks.
+Your responsibilities:
 
-Rules:
+1. Break high-level tasks into actionable subtasks
+2. Assign a priority score to EACH parent task
+3. Use available free time and user constraints while prioritizing
 
-1. Only create subtasks for meaningful work tasks such as:
-   - exams
-   - assignments
-   - DSA
-   - projects
-   - interviews
-   - learning goals
-   you are not stricted for only these type of subtasks create as per tasks
+IMPORTANT RULES:
 
-2. Do NOT create subtasks for:
-   - sleep
-   - eating
-   - relaxing
-   - basic daily activities
+1. Preserve the exact task_id from input.
+2. Return the same task_id for each corresponding task.
 
-For these tasks return:
-"subtasks": []
+3. Create subtasks for meaningful tasks such as:
+- exams
+- assignments
+- DSA practice
+- projects
+- interview preparation
+- learning goals
+- deadlines
+- personal goals
 
-3. Each subtask must be:
-   - actionable
-   - realistic
-   - small enough to complete
+These are examples, not strict limitations.
 
-4. Keep total subtask duration approximately equal to parent task duration.
+4. Do NOT create subtasks for:
+- sleep
+- eating
+- relaxing
+- commuting
+- fixed daily activities
 
-5. Return ONLY valid JSON.
+For these tasks:
+return an empty subtasks array.
 
-Input Tasks:
+5. Each subtask must:
+- be actionable
+- realistic
+- small enough to complete
+- collectively match the parent task duration approximately
+
+6. Assign priority_score between 0 and 10:
+
+0 → least urgent/important
+10 → most urgent/important
+
+While assigning priority consider:
+
+- task deadline
+- urgency
+- long-term importance
+- available free time
+- existing fixed commitments
+- user workload
+
+7. DO NOT generate schedules or time blocks.
+Scheduling will be handled separately.
+
+8. Return ONLY valid JSON.
+Do NOT return markdown.
+Do NOT return explanations.
+
+-----------------------------------
+INPUT TASKS:
 ${JSON.stringify(tasks, null, 2)}
 
-Expected Output Format:
+-----------------------------------
+USER FIXED CONSTRAINTS:
+${JSON.stringify(fixedConstraints, null, 2)}
+
+-----------------------------------
+AVAILABLE FREE SLOTS:
+${JSON.stringify(freeSlots, null, 2)}
+
+-----------------------------------
+
+Return STRICTLY in this format:
 
 {
   "tasks": [
     {
-      "parent_task_title": "Prepare for Exams",
+      "task_id": "uuid_here",
+      "priority_score": 8,
       "subtasks": [
         {
-          "title": "Revise Unit 1",
+          "title": "Subtask title",
           "estimated_duration_minutes": 60
-        },
-        {
-          "title": "Solve previous year questions",
-          "estimated_duration_minutes": 120
         }
       ]
-    },
-    {
-      "parent_task_title": "Sleep",
-      "subtasks": []
     }
   ]
 }
 `;
+};
