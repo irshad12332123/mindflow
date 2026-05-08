@@ -1,6 +1,6 @@
 import { cleanResponse } from "../../utils/cleanResponse";
-import { extractTaskPriorities } from "../../utils/getPriorityOfEachTask";
 import { geminiService } from "../ai/gemini.service";
+import { getPriorityForEachTask } from "../priority/priority.service";
 import { storeSubTasks } from "./subtask.repository";
 import { updateTaskPriorityColumn } from "./task.repository";
 import {
@@ -28,14 +28,14 @@ export const extractSubTasks = async (
     console.log(subtasks);
 
     const priorityOfEachTask: TaskPriorityType =
-      extractTaskPriorities(subtasks);
+      getPriorityForEachTask(subtasks);
 
-      // update the task priority
+    // update the task priority
     await updateTaskPriorityColumn(priorityOfEachTask);
 
     // store subtasks in the repo
     const createdSubtasks = await storeSubTasks(subtasks);
-    return createdSubtasks;
+    return { createdSubtasks, priorityOfEachTask };
   } catch (error: any) {
     console.error("Error occurred while extracting tasks:", error.message);
     throw error;
