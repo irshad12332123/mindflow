@@ -22,7 +22,7 @@ export const orchestration = async (rawText: string, userId: string) => {
   );
 
   // scheduler
-  const scheduledTasks = taskScheduler(
+  const scheduledTasks = await taskScheduler(
     tasks,
     createdSubtasks,
     freeSlots,
