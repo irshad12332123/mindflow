@@ -1,8 +1,13 @@
+import { Request, Response } from 'express';
 
-export const markSubTaskDone = async() => {
+export const markSubTaskDone = async (req: Request, res: Response) => {
   try {
 
+    
+
   } catch (error: any) {
-    return res.status(200).json(message: `Could not mark the subtask as marked ${error.message}`)
+    return res.status(200).json({
+      message: `Could not mark the subtask as marked ${error.message}`,
+    });
   }
-}
+};
