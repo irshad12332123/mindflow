@@ -448,6 +448,7 @@ model users {
   webauthn_credentials        webauthn_credentials[]
   brain_dumps                 brain_dumps[]
   daily_schedules             daily_schedules[]
+  execution_sessions          execution_sessions[]
   fixed_constraints           fixed_constraints[]
   task_logs                   task_logs[]
   tasks                       tasks[]
@@ -512,18 +513,20 @@ model brain_dumps {
 }
 
 model daily_schedules {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id         String    @db.Uuid
-  task_id         String    @db.Uuid
-  start_time      DateTime  @db.Timestamp(6)
-  end_time        DateTime  @db.Timestamp(6)
-  schedule_date   DateTime  @db.Date
-  schedule_status String?   @default("scheduled") @db.VarChar(50)
-  created_at      DateTime? @default(now()) @db.Timestamp(6)
-  subtask_id      String?   @db.Uuid
-  subtasks        subtasks? @relation(fields: [subtask_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  tasks           tasks     @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String               @db.Uuid
+  task_id            String               @db.Uuid
+  start_time         DateTime             @db.Timestamp(6)
+  end_time           DateTime             @db.Timestamp(6)
+  schedule_date      DateTime             @db.Date
+  schedule_status    String?              @default("scheduled") @db.VarChar(50)
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  subtask_id         String?              @db.Uuid
+  reschedule_reason  String?
+  subtasks           subtasks?            @relation(fields: [subtask_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tasks              tasks                @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users              users                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  execution_sessions execution_sessions[]
 
   @@index([schedule_date], map: "idx_schedule_date")
   @@index([user_id], map: "idx_schedule_user_id")
@@ -531,14 +534,15 @@ model daily_schedules {
 }
 
 model subtasks {
-  id                         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  task_id                    String            @db.Uuid
-  title                      String            @db.VarChar(255)
+  id                         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  task_id                    String               @db.Uuid
+  title                      String               @db.VarChar(255)
   estimated_duration_minutes Int?
-  status                     String?           @default("pending") @db.VarChar(50)
-  created_at                 DateTime?         @default(now()) @db.Timestamp(6)
+  status                     String?              @default("pending") @db.VarChar(50)
+  created_at                 DateTime?            @default(now()) @db.Timestamp(6)
   daily_schedules            daily_schedules[]
-  tasks                      tasks             @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  execution_sessions         execution_sessions[]
+  tasks                      tasks                @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -558,22 +562,24 @@ model task_logs {
 }
 
 model tasks {
-  id                         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  brain_dump_id              String            @db.Uuid
-  user_id                    String            @db.Uuid
-  title                      String            @db.VarChar(255)
-  task_type                  String?           @db.VarChar(50)
-  deadline                   DateTime?         @db.Timestamp(6)
+  id                         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brain_dump_id              String               @db.Uuid
+  user_id                    String               @db.Uuid
+  title                      String               @db.VarChar(255)
+  task_type                  String?              @db.VarChar(50)
+  deadline                   DateTime?            @db.Timestamp(6)
   estimated_duration_minutes Int?
-  priority_score             Decimal?          @db.Decimal(5, 2)
+  priority_score             Decimal?             @db.Decimal(5, 2)
   recommended_time_minutes   Int?
-  status                     String?           @default("pending") @db.VarChar(50)
-  created_at                 DateTime?         @default(now()) @db.Timestamp(6)
+  status                     String?              @default("pending") @db.VarChar(50)
+  created_at                 DateTime?            @default(now()) @db.Timestamp(6)
+  actual_time_spent_minutes  Int?                 @default(0)
   daily_schedules            daily_schedules[]
+  execution_sessions         execution_sessions[]
   subtasks                   subtasks[]
   task_logs                  task_logs[]
-  brain_dumps                brain_dumps       @relation(fields: [brain_dump_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                      users             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  brain_dumps                brain_dumps          @relation(fields: [brain_dump_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                      users                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([brain_dump_id], map: "idx_tasks_brain_dump_id")
   @@index([user_id], map: "idx_tasks_user_id")
@@ -590,6 +596,28 @@ model fixed_constraints {
   updated_at DateTime? @default(now()) @db.Timestamp(6)
   users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@schema("public")
+}
+
+model execution_sessions {
+  id                      String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                 String          @db.Uuid
+  schedule_id             String          @db.Uuid
+  task_id                 String          @db.Uuid
+  subtask_id              String          @db.Uuid
+  started_at              DateTime?       @db.Timestamp(6)
+  ended_at                DateTime?       @db.Timestamp(6)
+  actual_duration_minutes Int?            @default(0)
+  session_status          String?         @default("started") @db.VarChar(50)
+  created_at              DateTime?       @default(now()) @db.Timestamp(6)
+  daily_schedules         daily_schedules @relation(fields: [schedule_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  subtasks                subtasks        @relation(fields: [subtask_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tasks                   tasks           @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                   users           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([schedule_id], map: "idx_execution_schedule")
+  @@index([subtask_id], map: "idx_execution_subtask")
+  @@index([user_id], map: "idx_execution_user")
   @@schema("public")
 }
 
