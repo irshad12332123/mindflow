@@ -10,6 +10,15 @@ export type taskType = {
   status: string | null;
 };
 
+export type subTasksType = {
+  id: string;
+  task_id: string;
+  title: string;
+  estimated_duration_minutes: number | null;
+  status: string | null;
+  created_at: Date | null;
+}[];
+
 export type fixedConstraintsType = {
   title: string;
   start_time: string;
