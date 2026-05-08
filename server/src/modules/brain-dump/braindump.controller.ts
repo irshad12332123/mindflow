@@ -21,7 +21,6 @@ export const createPlanFromBrainDump = async (req: Request, res: Response) => {
     }
 
     const token = authHeader.split(" ")[1];
-    // console.log(token);
 
     if (!token) {
       return res.status(401).json({

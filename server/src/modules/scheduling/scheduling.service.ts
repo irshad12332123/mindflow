@@ -22,21 +22,17 @@ export const taskScheduler = async (
   // sort the sub tasks based on parent priority
   sortSubTaks(subTasks, priorityMap);
 
-  const { schedule, remainingSubtasks } = allocateSubTasks(freeSlots, subTasks);
+  const { schedule } = allocateSubTasks(freeSlots, subTasks);
 
-  const formattedUnscheduled = remainingSubtasks.map((task) => ({
-    task_id: task.task_id,
-    subtask_id: task.id,
-    title: task.title,
-    estimated_duration_minutes: task.estimated_duration_minutes,
-    reason: "Insufficient available time",
-  }));
+  // const formattedUnscheduled = remainingSubtasks.map((task) => ({
+  //   task_id: task.task_id,
+  //   subtask_id: task.id,
+  //   title: task.title,
+  //   estimated_duration_minutes: task.estimated_duration_minutes,
+  //   reason: "Insufficient available time",
+  // }));
 
   // store the scheduled tasks in db
-  await storeScheduledTasks(schedule, userId);
-
-  return {
-    scheduled_tasks: schedule,
-    unscheduled_tasks: formattedUnscheduled,
-  };
+  const storedScheduleTasks = await storeScheduledTasks(schedule, userId);
+  return storedScheduleTasks;
 };
